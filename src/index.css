@@ -1,0 +1,9 @@
+body {
+    background-color: blue;
+}
+
+#root {
+    width: 400px;
+    height: 400px;
+    background-color: rebeccapurple;
+}
