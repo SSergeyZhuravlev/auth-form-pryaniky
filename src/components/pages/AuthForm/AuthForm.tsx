@@ -1,23 +1,46 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { queryClient } from '../../../api/queryClient';
+import { Login, login, loginSchema } from '../../../api/login';
+import { Button } from '../../ui/Button/Button';
 import { FormField } from '../../ui/FormField/FormField';
 import { Title } from '../../ui/Title/Title';
-import { Button } from '../../ui/Button/Button';
 
-interface IAuthFormProps {
-    onClick: () => void,
-}
+export const AuthForm = () => {
+    const [_, setToken] = useState<string | null>();
 
-export const AuthForm: FC<IAuthFormProps> = ({ onClick }) => {
-    const [value, setValue] = useState('');
-    const [value1, setValue1] = useState('');
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+      } = useForm<Login>({
+        resolver: zodResolver(loginSchema),
+      })
+
+    const { mutate } = useMutation({
+        mutationFn: login,
+
+        onSuccess(data) {
+            setToken(data.data.token);
+            localStorage.setItem('token', JSON.stringify(data.data.token));
+        },
+    }, queryClient)
 
     return (
-        <form>
+        <form onSubmit={handleSubmit(({ username, password }) => {
+            mutate({ username, password });
+        })}>
             <Title type="h2">Введите логин и пароль</Title>
-            <FormField type='text' value={value} placeholder='Введите логин' onChange={(e) => setValue(e.target.value)}>Логин</FormField>
-            <FormField type='password' value={value1} placeholder='Введите пароль' onChange={(e) => setValue1(e.target.value)}>Пароль</FormField>
+            <FormField label='Логин' errorMessage={errors.username?.message}>
+                <input type="text" { ...register('username') } />
+            </FormField>
+            <FormField label='Пароль' errorMessage={errors.password?.message}>
+                <input type="password" { ...register('password') } />
+            </FormField>
             <div>
-                <Button type='button' onClick={onClick}>Button</Button>
+                <Button type='submit'>Button</Button>
             </div>
         </form>
     )

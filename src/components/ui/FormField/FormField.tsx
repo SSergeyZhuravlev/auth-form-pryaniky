@@ -2,24 +2,17 @@ import { FC } from 'react';
 import './FormField.css';
 
 export interface IFormFieldProps {
-    type: string,
-    placeholder: string,
     children: React.ReactNode,
-    value: string | undefined,
-    isError?: string,
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void,
+    label: string,
+    errorMessage?: string,
 }
 
-export const FormField: FC<IFormFieldProps> = ({ type, placeholder, children, value, isError, onChange }) => {
+export const FormField: FC<IFormFieldProps> = ({ children, label, errorMessage, }) => {
     return (
         <label>
-            <span>{children}</span>
-            { isError && <span>{isError}</span> }
-            <input 
-                type={type} 
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange} />
+            <span>{label}</span>
+            { errorMessage && <span>{errorMessage}</span> }
+            {children}
         </label>
     )
 }
