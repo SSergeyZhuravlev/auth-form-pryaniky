@@ -25,4 +25,6 @@ export const TableItem: FC<ITableItemProps> = ({ data, isEdit, onChange }) => {
     )
 }
 
+// TODO
 // Сделать форму для добавления новой записи
+// Перенести этот компонент в компонент таблицы
