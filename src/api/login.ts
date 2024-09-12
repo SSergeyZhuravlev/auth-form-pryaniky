@@ -1,19 +1,14 @@
 import { HOST } from './host';
 import { z } from 'zod';
 
-// export const loginSchema = z.object({
-//     username: z.string().trim().startsWith('user', { message: 'Неверное имя пользователя' }),
-//     password: z.string().trim().startsWith('password', { message: 'Неверный пароль' }),
-// });
-
 export const loginSchema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.string().trim().startsWith('user', { message: 'Неверное имя пользователя' }),
+    password: z.string().trim().startsWith('password', { message: 'Неверный пароль' }),
 });
 
 export type Login = z.infer<typeof loginSchema>;
 
-type LoginResponse = {
+export type LoginResponse = {
     data: { token: string },
     error_code: number,
     error_message: string,

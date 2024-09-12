@@ -3,7 +3,7 @@ import './FormField.css';
 
 export interface IFormFieldProps {
     children: React.ReactNode,
-    label: string,
+    label?: string,
     errorMessage?: string,
 }
 

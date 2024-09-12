@@ -1,32 +1,28 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { FC } from 'react';
+import { UseMutateFunction } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { queryClient } from '../../../api/queryClient';
-import { Login, login, loginSchema } from '../../../api/login';
+import { Login,  loginSchema } from '../../../api/login';
 import { Button } from '../../ui/Button/Button';
 import { FormField } from '../../ui/FormField/FormField';
 import { Title } from '../../ui/Title/Title';
+import { LoginResponse } from '../../../api/login';
 
-export const AuthForm = () => {
-    const [_, setToken] = useState<string | null>();
+interface IAuthFormProps {
+    mutate: UseMutateFunction<LoginResponse, Error, {
+        username: string;
+        password: string;
+    }, unknown>
+}
 
+export const AuthForm: FC<IAuthFormProps> = ({ mutate }) => {
     const {
         register,
         handleSubmit,
         formState: { errors },
       } = useForm<Login>({
         resolver: zodResolver(loginSchema),
-      })
-
-    const { mutate } = useMutation({
-        mutationFn: login,
-
-        onSuccess(data) {
-            setToken(data.data.token);
-            localStorage.setItem('token', JSON.stringify(data.data.token));
-        },
-    }, queryClient)
+      });
 
     return (
         <form onSubmit={handleSubmit(({ username, password }) => {
