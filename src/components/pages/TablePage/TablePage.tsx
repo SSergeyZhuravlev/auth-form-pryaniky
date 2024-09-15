@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchTableData, TableData } from '../../../api/fetchTableData';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { queryClient } from '../../../api/queryClient';
 import { TableItem } from '../../ui/TableItem/TableItem';
 import { TableHead } from '../../ui/TableHead/TableHead';
@@ -13,16 +13,30 @@ interface ITablePage {
 export const TablePage: FC<ITablePage> = ({ token }) => {
     const { data } = useQuery({
         queryFn: async () => await fetchTableData(token),
-        queryKey: ['table-data']
+        queryKey: ['table-data'],
     }, queryClient);
 
     const [isEdit, setIsEdit] = useState('');
-    const [itemData, setItemData] = useState<TableData>();
+    const [itemData, setItemData] = useState<TableData[]>();
+
+    useEffect(() => {
+        data && setItemData(data.data)
+    }, [data?.data])
     
-    function handleOnChange(event: React.ChangeEvent<HTMLInputElement>, data: TableData, rowID: string) {
+    function handleOnChange(event: React.ChangeEvent<HTMLInputElement>, data: TableData[], rowID: string) {
         const { value, name } = event.target;
-        
-        return setItemData(data.id + 1 === rowID ? { ...data,  [name]: value} : data)
+                                        
+        setItemData(data.map((el) => {
+            if (el.id === rowID) {
+                // Здесь добавить мутацию с отправкой измененных данных на сервер
+
+                return {
+                    ...el,
+                    [name]: value,
+                }
+            } 
+            return el;
+        }));
     }
 
     return (
@@ -31,21 +45,25 @@ export const TablePage: FC<ITablePage> = ({ token }) => {
                 { data && <TableHead data={data.data[0]} /> }
                 <tbody>
                     {
-                        data ? data.data.map((data) => {
-                            const rowID = data.id + 1;
+                        itemData ? itemData.map((item) => {
+                            const rowID = item.id;
                             return (
-                                <tr key={data.id} id={rowID}>
-                                    <TableItem data={itemData || data} isEdit={isEdit} onChange={e => handleOnChange(e, data, rowID)} />
+                                <tr key={rowID} id={rowID}>
+                                    <TableItem data={item} isEdit={isEdit} onChange={e => handleOnChange(e, itemData, rowID)} />
                                     <td>
                                         {
-                                            <Button type='button' onClick={() => {
-                                                if (!isEdit) setIsEdit(data.id)
+                                            <Button type='button' id={rowID + 1} onClick={(e) => {
+                                                if (!isEdit && e.currentTarget.id === rowID + 1) {
+                                                    setIsEdit(rowID);
+                                                    e.currentTarget.textContent = 'Отмена'
+                                                }
                                                 else {
-                                                    setItemData(data)
-                                                    setIsEdit('')
+                                                    setItemData(itemData);
+                                                    setIsEdit('');
+                                                    e.currentTarget.textContent = 'Изменить'
                                                 }
                                             }}>
-                                                { !isEdit ? 'Изменить' : 'Отмена' }
+                                                Изменить
                                             </Button>
                                         }
                                     </td>

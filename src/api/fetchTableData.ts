@@ -1,30 +1,38 @@
+import { z } from 'zod';
 import { HOST } from './host';
+import { validateResponse } from './validateResponse';
 
-export type TableData = {
-    companySigDate: string,
-    companySignatureName: string,
-    documentName: string,
-    documentStatus: string,
-    documentType: string,
-    employeeNumber: string,
-    employeeSigDate: string,
-    employeeSignatureName: string,
-    id: string,
-}
+const TableDataSchema = z.object({
+    companySigDate: z.string(),
+    companySignatureName: z.string(),
+    documentName: z.string(),
+    documentStatus: z.string(),
+    documentType: z.string(),
+    employeeNumber: z.string(),
+    employeeSigDate: z.string(),
+    employeeSignatureName: z.string(),
+    id: z.string(),
+})
 
-type TableDataResponse = {
-    data: TableData[],
-    error_code: number,
-    error_message: string,
-    profiling: string,
-    timings: unknown,
-}
+export type TableData = z.infer<typeof TableDataSchema>;
 
-export function fetchTableData(token: string): Promise<TableDataResponse> {
-    return fetch(`${HOST}/ru/data/v3/testmethods/docs/userdocs/get`, {
+const TableDataResponseSchema = z.object({
+    data: z.array(TableDataSchema),
+    error_code: z.number(),
+    error_message: z.string(),
+    profiling: z.string(),
+    timings: z.unknown(),
+})
+
+type TableDataResponse = z.infer<typeof TableDataResponseSchema>
+
+export async function fetchTableData(token: string): Promise<TableDataResponse> {
+    return await fetch(`${HOST}/ru/data/v3/testmethods/docs/userdocs/get`, {
         headers: {
             'x-auth': token,
         }
     })
-    .then(res => res.json());
+    .then(validateResponse)
+    .then(res => res.json())
+    .then(data => TableDataResponseSchema.parse(data));
 }
