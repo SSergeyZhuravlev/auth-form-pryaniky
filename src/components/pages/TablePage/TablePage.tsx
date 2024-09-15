@@ -29,6 +29,9 @@ export const TablePage: FC<ITablePage> = ({ token }) => {
         setItemData(data.map((el) => {
             if (el.id === rowID) {
                 // Здесь добавить мутацию с отправкой измененных данных на сервер
+                // fetch(`${HOST}/.../{rowID}`{
+                //      headers: { ... } body: { { ...el, [name]: value } }
+                // })
 
                 return {
                     ...el,
@@ -58,7 +61,7 @@ export const TablePage: FC<ITablePage> = ({ token }) => {
                                                     e.currentTarget.textContent = 'Отмена'
                                                 }
                                                 else {
-                                                    setItemData(itemData);
+                                                    setItemData(data?.data);
                                                     setIsEdit('');
                                                     e.currentTarget.textContent = 'Изменить'
                                                 }
